@@ -24,5 +24,5 @@
   when: ansible_os_family == 'Debian'
   tags: install_kube
 
-  #- include_tasks: './config_master_node.yml'
-  #tags: config_master_kube
+- include_tasks: './config_master_node.yml'
+  tags: config_master_kube
