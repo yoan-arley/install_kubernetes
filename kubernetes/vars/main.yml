@@ -1,0 +1,34 @@
+---
+# vars file for kubernetes
+docker_rh:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io 
+  - docker-compose-plugin
+
+repo_docker_d:
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+
+docker_d:
+  - docker
+  - docker.io
+
+kube:
+  - kubeadm
+  - kubelet
+  - kubectl
+
+HOME:
+  - /home/golden
+
+ports:
+  - 6443/tcp
+  - 10250/tcp
+  - 10251/tcp
+  - 10252/tcp
+  - 10255/tcp
+  - 2379/tcp
+  - 2380/tcp

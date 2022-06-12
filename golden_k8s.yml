@@ -1,0 +1,7 @@
+---
+- name: "Install master & nodes's K8s"
+  hosts: k8s
+  become: yes
+  remote_user: golden
+  roles:
+    - role: "kubernetes"

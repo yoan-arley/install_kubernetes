@@ -1,0 +1,17 @@
+---
+- name: 'Copy kubernetes.repo'
+  copy:
+    src: '../files/kubernetes.repo'
+    dest: '/etc/yum.repos.d/kubernetes.repo'
+    owner: root
+    group: root
+    mode: 0766
+  become: yes
+  tags: repo
+
+- name: 'Install Kubernetes'
+  yum:
+    name: 'kubeadm'
+    state: present
+  become: yes
+  tags: i_kube

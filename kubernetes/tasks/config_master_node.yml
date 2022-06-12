@@ -1,0 +1,30 @@
+---
+- name: "kubeadm init"
+  when: inventory_hostname == 'svlumk8s01'
+  shell:
+    cmd: 'kubeadm init --apiserver-advertise-address=192.168.1.124 --pod-network-cidr=10.0.0.0/16 > /tmp/init'
+  become: yes
+  tags: init_k8s
+
+- name: "Create directory k8s"
+  when: inventory_hostname == 'svlumk8s01'
+  file:
+    path: '{{HOME}}/.kube'
+    state: directory
+    mode: 0755
+  become: yes
+  tags: dir_k8s
+
+- name: "Copy admin.conf"
+  when: inventory_hostname == 'svlumk8s01'
+  shell:
+    cmd: 'cp -i /etc/kubernetes/admin.conf {{HOME}}/.kube/config'
+  become: yes
+  tags: a_conf_k8s
+
+- name: "Set Owner"
+  when: inventory_hostname == 'svlumk8s01'
+  shell:
+    cmd: 'chown $(id -u):$(id -g) {{HOME}}/.kube/config'
+  become: yes
+  tags: s_chown

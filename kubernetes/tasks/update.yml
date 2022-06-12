@@ -1,0 +1,22 @@
+---
+- name: 'Update cache Family RedHat'
+  when: ansible_os_family == 'RedHat'
+  yum:
+    update_cache: yes
+  become: yes
+  tags: u_cache_c7
+
+- name: 'Install epel-release'
+  when: ansible_os_family == 'RedHat'
+  yum:
+    name: 'epel-release'
+    state: present
+  tags: epel_release
+
+- name: 'Update cache Family Debian'
+  when: ansible_os_family == 'Debian'
+  apt:
+    upgrade: dist
+    update_cache: yes
+  become: yes
+  tags: u_cache_d

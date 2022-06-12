@@ -1,0 +1,49 @@
+---
+- name: 'Disable swap'
+  shell:
+     cmd: 'swapoff -a'
+  become: yes
+  tags: so
+
+- name: 'Disable swap to fstab'
+  replace:
+    path: '/etc/fstab'
+    regexp: '^/dev/mapper/centos-swap(.*)'
+    replace: '# \1'
+  become: yes
+  tags: d_swap
+
+- name: 'Bridge nf call'
+  copy:
+    src: '../files/k8s.conf'
+    dest: '/etc/sysctl.d/k8s.conf'
+    owner: 'root'
+    group: 'root'
+    mode: u=rw,g=r,o=r
+  become: yes
+  tags: nf
+
+- name: 'Init Sysctl'
+  shell:
+     cmd: 'sysctl --system'
+  become: yes
+  tags: i_sysctl
+
+- name: 'Install Kubeadm'
+  copy:
+    src: '../files/kubernetes.repo'
+    dest: '/etc/yum.repos.d/kubernetes.repo'
+    owner: 'root'
+    group: 'root'
+    mode: u=rw,g=r,o=r
+  become: yes
+  tags: ik
+
+- name: 'Install kubeadm kubelet kubectl'
+  yum:
+    name: '{{item}}'
+    state: present
+  with_items: '{{kube}}'
+  become: yes
+  notify: 'kube'
+  tags: kube

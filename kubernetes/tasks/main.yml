@@ -1,0 +1,28 @@
+---
+# tasks file for kubernetes
+- name: 'Set hostname'
+  hostname:
+    name: '{{inventory_hostname}}.golden.lan'
+  become: yes
+  tags: hnctl
+
+- include_tasks: './update.yml'
+  tags: update
+
+- include_tasks: './docker.yml'
+  tags: docker_inst
+
+- include_tasks: './hosts.yml'
+  when: ansible_os_family == 'RedHat'
+  tags: res_name
+
+- include_tasks: './install_k8s_rh.yml'
+  when: ansible_os_family == 'RedHat'
+  tags: install_kube
+
+- include_tasks: './install_k8s_d.yml'
+  when: ansible_os_family == 'Debian'
+  tags: install_kube
+
+  #- include_tasks: './config_master_node.yml'
+  #tags: config_master_kube

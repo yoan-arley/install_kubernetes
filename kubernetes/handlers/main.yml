@@ -1,0 +1,8 @@
+---
+# handlers file for kubernetes
+- name: 'Enable Kube'
+  systemd:
+    name: kubelet
+    state: started
+    enabled: yes
+  become: yes
