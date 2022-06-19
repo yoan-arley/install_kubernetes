@@ -6,6 +6,9 @@
   become: yes
   tags: hnctl
 
+- include_tasks: './fdisk.yml'
+  tags: fs_dk
+
 - include_tasks: './update.yml'
   tags: update
 

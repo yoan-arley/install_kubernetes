@@ -2,14 +2,14 @@
 - name: "kubeadm init"
   when: inventory_hostname == 'svlumk8s01'
   shell:
-    cmd: 'kubeadm init --apiserver-advertise-address=192.168.1.124 --pod-network-cidr=10.0.0.0/16 > /tmp/init'
+    cmd: 'kubeadm init --apiserver-advertise-address=192.168.1.124 --pod-network-cidr=10.0.0.0/16 > /root/init'
   become: yes
   tags: init_k8s
 
 - name: "Create directory k8s"
   when: inventory_hostname == 'svlumk8s01'
   file:
-    path: '{{HOME}}/.kube'
+    path: '/root/.kube'
     state: directory
     mode: 0755
   become: yes
@@ -18,13 +18,72 @@
 - name: "Copy admin.conf"
   when: inventory_hostname == 'svlumk8s01'
   shell:
-    cmd: 'cp -i /etc/kubernetes/admin.conf {{HOME}}/.kube/config'
+    cmd: 'cp -i /etc/kubernetes/admin.conf /root/.kube/config'
   become: yes
   tags: a_conf_k8s
 
 - name: "Set Owner"
   when: inventory_hostname == 'svlumk8s01'
   shell:
-    cmd: 'chown $(id -u):$(id -g) {{HOME}}/.kube/config'
+    cmd: 'chown $(id -u):$(id -g) /root/.kube/config'
   become: yes
   tags: s_chown
+
+- name: "Apply kube-flannel.yml"
+  when: inventory_hostname == 'svlumk8s01'
+  shell:
+    cmd: 'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml'
+  become: yes
+  tags: kf
+
+- name: "Create init.sh"
+  when: inventory_hostname == 'svlumk8s01'
+  shell:
+    cmd: 'echo "#!/bin/bash" > /tmp/init.sh && chmod +x /tmp/init.sh'
+  become: yes
+
+- name: "Extract init.."
+  when: inventory_hostname == 'svlumk8s01'
+  shell:
+          cmd: "tail -n20 /root/init > /etc/kubernetes/init.cf && tail -n2 /root/init >> /tmp/init.sh && rm -rf /root/init"
+  become: yes
+  tags: tail
+
+- name: "Copy scp.sh"
+  when: inventory_hostname == 'svlumk8s01'
+  copy:
+    src: '../templates/scp.sh'
+    dest: '/tmp/scp.sh'
+    mode: 'preserve'
+  become: yes
+
+- name: "Execut scp.sh"
+  when: inventory_hostname == 'svlumk8s01'
+  command: '/tmp/scp.sh'
+  become: yes
+
+- name: "Remove file"
+  when: inventory_hostname == 'svlumk8s01'
+  shell:
+    cmd: "rm -rf /tmp/{scp.sh,init.sh}"
+  become: yes
+
+- name: "Copy init.sh"
+  when: inventory_hostname != 'svlumk8s01'
+  copy:
+    src: '/tmp/init.sh'
+    dest: '/tmp/init.sh'
+    mode: 'preserve'
+  become: yes
+
+- name: "Init nodes k8s"
+  when: inventory_hostname != 'svlumk8s01'
+  command: '/tmp/init.sh && rm -rf /tmp/init.sh'
+  become: yes
+
+- name: "Kube auto completion"
+  when: inventory_hostname == 'svlumk8s01'
+  shell:
+    cmd: 'kubectl completion bash > /etc/bash_completion.d/kubectl && echo "source <(kubectl completion bash)" >> /root/.bashrc'
+  become: yes
+  tags: a_comp
